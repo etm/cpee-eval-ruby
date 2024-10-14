@@ -88,7 +88,7 @@ module CPEE
           execresult = exec struct, code, CPEE::EvalRuby::Translation::simplify_structurized_result(call_result), call_headers
 
           send = []
-          send << Riddl::Parameter::Complex.new('result','application/json',execresult[:res])
+          send << Riddl::Parameter::Complex.new('result','application/json',execresult[:res] || '')
           if execresult[:signal]
             send << Riddl::Parameter::Simple.new('signal',execresult[:signal])
             send << Riddl::Parameter::Simple.new('signal_text',execresult[:signal_text] || '')

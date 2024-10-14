@@ -38,15 +38,15 @@ module CPEE
         if result && result.length == 1
           if result[0].has_key? 'mimetype'
             if result[0]['mimetype'] == 'application/json'
-              result = JSON::parse(result[0]['data']) rescue nil
+              result = JSON::parse(CPEE::EvalRuby::Translation::extract_base64(result[0]['data'])) rescue nil
             elsif result[0]['mimetype'] == 'text/csv'
-              result = result[0]['data']
+              result = CPEE::EvalRuby::Translation::extract_base64(result[0]['data'])
             elsif result[0]['mimetype'] == 'text/yaml'
-              result = YAML::load(result[0]['data']) rescue nil
+              result = YAML::load(CPEE::EvalRuby::Translation::extract_base64(result[0]['data'])) rescue nil
             elsif result[0]['mimetype'] == 'application/xml' || result[0]['mimetype'] == 'text/xml'
-              result = XML::Smart::string(result[0]['data']) rescue nil
+              result = XML::Smart::string(CPEE::EvalRuby::Translation::extract_base64(result[0]['data'])) rescue nil
             elsif result[0]['mimetype'] == 'text/plain'
-              result = result[0]['data']
+              result = CPEE::EvalRuby::Translation::extract_base64(result[0]['data'])
               if result.start_with?("<?xml version=")
                 result = XML::Smart::string(result)
               else
@@ -54,7 +54,7 @@ module CPEE
                 result = result.to_i if result == result.to_i.to_s
               end
             elsif result[0]['mimetype'] == 'text/html'
-              result = result[0]['data']
+              result = CPEE::EvalRuby::Translation::extract_base64(result[0]['data'])
               result = result.to_f if result == result.to_f.to_s
               result = result.to_i if result == result.to_i.to_s
             else
@@ -135,6 +135,13 @@ module CPEE
 
       def self::convert_to_base64(text)
         ('data:' + MimeMagic.by_magic(text).type + ';base64,' + Base64::encode64(text)) rescue ('data:application/octet-stream;base64,' + Base64::encode64(text))
+      end
+      def self::extract_base64(text)
+        if text.is_a?(String) && text.start_with?(/(data:[\w_\/-]+;base64,)/)
+          Base64::decode64(text.delete_prefix $1)
+        else  
+          text
+        end
       end
 
       def self::structurize_result(result)
