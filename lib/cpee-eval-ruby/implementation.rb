@@ -100,7 +100,7 @@ module CPEE
             res[e] = struct.data[e]
           end
           if res.any?
-            send << Riddl::Parameter::Complex.new('dataelements','application/json',JSON::generate(data)) if mode == :full
+            send << Riddl::Parameter::Complex.new('dataelements','application/json',JSON::generate(dataelements)) if mode == :full
             send << Riddl::Parameter::Complex.new('changed_dataelements','application/json',JSON::generate(res))
           end
           res = {}
