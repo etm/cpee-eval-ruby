@@ -117,7 +117,7 @@ module CPEE
           struct = WEEL::ReadStructure.new(dataelements,endpoints,local,additional)
           execresult = exec struct, code
           send = []
-          send << Riddl::Parameter::Complex.new('result','application/json',execresult[:res])
+          send << Riddl::Parameter::Complex.new('result','application/json',execresult[:res] || '')
           if execresult[:signal]
             send << Riddl::Parameter::Simple.new('signal',execresult[:signal])
             send << Riddl::Parameter::Simple.new('signal_text',execresult[:signal_text] || '')
