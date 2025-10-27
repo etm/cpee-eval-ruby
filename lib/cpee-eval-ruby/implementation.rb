@@ -25,6 +25,7 @@ require 'redis'
 require 'json'
 require 'weel'
 require 'charlock_holmes'
+require 'timeout'
 require_relative 'translation'
 
 module CPEE
@@ -36,15 +37,18 @@ module CPEE
       def exec(__struct,__code,result=nil,headers=nil)
         __ret = {}
         __cat = catch WEEL::Signal::Again do
-          __ret[:res] = JSON::generate(__struct.instance_eval(__code))
+          Timeout.timeout(7) do
+            __ret[:res] = JSON::generate(__struct.instance_eval(__code))
+          end
           WEEL::Signal::Proceed
         end
         if __cat.nil? || __cat == WEEL::Signal::Again
           __ret[:signal] << 'Signal::Again'
         end
-      rescue => err
+      rescue Timeout::Error
+        pp 'rrr'
         __ret[:signal] = 'Signal::Error'
-        __ret[:signal_text] = (err.backtrace ? err.backtrace[0].gsub(/([\w -_]+):(\d+):in.*/,'\\1, Line \2: ') : '') + err.message
+        __ret[:signal_text] = 'Your code took longer than 7 seconds'
       rescue WEEL::Signal::Again
         __ret[:signal] = 'Signal::Again'
       rescue  WEEL::Signal::Error => err
@@ -55,6 +59,9 @@ module CPEE
       rescue SyntaxError => err
         __ret[:signal] = 'Signal::SyntaxError'
         __ret[:signal_text] = err.message
+      rescue => err
+        __ret[:signal] = 'Signal::Error'
+        __ret[:signal_text] = (err.backtrace ? err.backtrace[0].gsub(/([\w -_]+):(\d+):in.*/,'\\1, Line \2: ') : '') + err.message
       ensure
         return __ret
       end
@@ -93,6 +100,7 @@ module CPEE
             send << Riddl::Parameter::Simple.new('signal',execresult[:signal])
             send << Riddl::Parameter::Simple.new('signal_text',execresult[:signal_text] || '')
             @status = 555
+            return send
           end
 
           res = {}
