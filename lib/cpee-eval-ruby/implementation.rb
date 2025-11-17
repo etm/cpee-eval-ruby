@@ -46,7 +46,6 @@ module CPEE
           __ret[:signal] << 'Signal::Again'
         end
       rescue Timeout::Error
-        pp 'rrr'
         __ret[:signal] = 'Signal::Error'
         __ret[:signal_text] = 'Your code took longer than 7 seconds'
       rescue WEEL::Signal::Again

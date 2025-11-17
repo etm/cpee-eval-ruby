@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name             = "cpee-eval-ruby"
-  s.version          = "1.0.9"
+  s.version          = "1.0.10"
   s.platform         = Gem::Platform::RUBY
   s.license          = "LGPL-3.0-or-later"
   s.summary          = "Ruby eval for the cloud process execution engine (cpee.org)"
