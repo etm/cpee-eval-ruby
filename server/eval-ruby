@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 
 require 'rubygems'
-require_relative './lib/implementation'
+require 'cpee-eval-ruby/implementation'
 
 options = {
   :host => 'localhost',
