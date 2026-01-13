@@ -80,15 +80,19 @@ module CPEE
             result = result[0].value
           elsif result[0].is_a? Riddl::Parameter::Complex
             if result[0].mimetype == 'application/json'
-              result = JSON::parse(result[0].value.read) rescue nil
+              ttt = (result[0].value.respond_to?(:read) ? result[0].value.read : result[0].value) rescue nil
+              result = JSON::parse(ttt) rescue nil
             elsif result[0].mimetype == 'text/csv'
-              result = result[0].value.read
+              ttt = (result[0].value.respond_to?(:read) ? result[0].value.read : result[0].value) rescue nil
+              result = ttt
             elsif result[0].mimetype == 'text/yaml'
-              result = YAML::load(result[0].value.read) rescue nil
+              ttt = (result[0].value.respond_to?(:read) ? result[0].value.read : result[0].value) rescue nil
+              result = YAML::load(ttt) rescue nil
             elsif result[0].mimetype == 'application/xml' || result[0].mimetype == 'text/xml'
-              result = XML::Smart::string(result[0].value.read) rescue nil
+              ttt = (result[0].value.respond_to?(:read) ? result[0].value.read : result[0].value) rescue nil
+              result = XML::Smart::string(ttt) rescue nil
             elsif result[0].mimetype == 'text/plain'
-              result = result[0].value.read
+              result = (result[0].value.respond_to?(:read) ? result[0].value.read : result[0].value) rescue nil
               if result.start_with?("<?xml version=")
                 result = XML::Smart::string(result)
               else
@@ -96,7 +100,7 @@ module CPEE
                 result = result.to_i if result == result.to_i.to_s
               end
             elsif result[0].mimetype == 'text/html'
-              result = result[0].value.read
+              result = (result[0].value.respond_to?(:read) ? result[0].value.read : result[0].value) rescue nil
               result = result.to_f if result == result.to_f.to_s
               result = result.to_i if result == result.to_i.to_s
             else
@@ -139,7 +143,7 @@ module CPEE
       def self::extract_base64(text)
         if text.is_a?(String) && text.start_with?(/(data:[\w_\/-]+;base64,)/)
           Base64::decode64(text.delete_prefix $1)
-        else  
+        else
           text
         end
       end
@@ -150,21 +154,22 @@ module CPEE
             { 'name' => r.name, 'data' => r.value }
           elsif r.is_a? Riddl::Parameter::Complex
             res = if r.mimetype == 'application/json'
-              ttt = r.value.read
+              ttt = r.value.respond_to?(:read) ? r.value.read : r.value
               enc = CPEE::EvalRuby::Translation::detect_encoding(ttt)
               enc == 'OTHER' ? ttt.inspect : (ttt.encode('UTF-8',enc) rescue CPEE::EvalRuby::Translation::convert_to_base64(ttt))
             elsif r.mimetype == 'text/csv'
-              ttt = r.value.read
+              ttt = r.value.respond_to?(:read) ? r.value.read : r.value
               enc = CPEE::EvalRuby::Translation::detect_encoding(ttt)
               enc == 'OTHER' ? ttt.inspect : (ttt.encode('UTF-8',enc) rescue CPEE::EvalRuby::Translation::convert_to_base64(ttt))
             elsif r.mimetype == 'text/plain' || r.mimetype == 'text/html'
-              ttt = r.value.read
+              ttt = r.value.respond_to?(:read) ? r.value.read : r.value
               ttt = ttt.to_f if ttt == ttt.to_f.to_s
               ttt = ttt.to_i if ttt == ttt.to_i.to_s
               enc = CPEE::EvalRuby::Translation::detect_encoding(ttt)
               enc == 'OTHER' ? ttt.inspect : (ttt.encode('UTF-8',enc) rescue CPEE::EvalRuby::Translation::convert_to_base64(ttt))
             else
-              CPEE::EvalRuby::Translation::convert_to_base64(r.value.read)
+              ttt = r.value.respond_to?(:read) ? r.value.read : r.value
+              CPEE::EvalRuby::Translation::convert_to_base64(ttt)
             end
 
             tmp = {
@@ -172,7 +177,7 @@ module CPEE
               'mimetype' => r.mimetype,
               'data' => res.to_s
             }
-            r.value.rewind
+            r.value.rewind if r.value.respond_to? :rewind
             tmp
           end
         end
