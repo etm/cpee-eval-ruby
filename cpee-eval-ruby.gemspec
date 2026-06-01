@@ -22,4 +22,5 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'riddl', '~> 1.0'
   s.add_runtime_dependency 'weel', '~> 1.99'
+  s.add_runtime_dependency 'cpee', '~> 2.1', '>= 2.1.114'
 end
